@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+
 import { FavoriteService } from './favorite.service';
 import { GetUser } from 'src/@common/decorators/get-user.decorator';
 import { User } from 'src/auth/user.entity';
@@ -23,7 +24,10 @@ export class FavoriteController {
   }
 
   @Post('/:id')
-  toggleFavorite(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+  toggleFavorite(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<number> {
     return this.favoriteService.toggleFavorite(id, user);
   }
 }

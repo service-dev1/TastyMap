@@ -1,12 +1,14 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostModule } from './post/post.module';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ImageModule } from './image/image.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+
+import { AuthModule } from './auth/auth.module';
+import { ImageModule } from './image/image.module';
+import { PostModule } from './post/post.module';
 import { FavoriteModule } from './favorite/favorite.module';
+import { LoggerMiddleware } from './@common/middlewares/logger.middleware';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { FavoriteModule } from './favorite/favorite.module';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/',
     }),
     PostModule,
     AuthModule,
@@ -31,4 +34,8 @@ import { FavoriteModule } from './favorite/favorite.module';
   ],
   providers: [ConfigService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

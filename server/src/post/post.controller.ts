@@ -12,11 +12,13 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { PostService } from './post.service';
-import { CreatePostDto } from './dto/create-post.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/@common/decorators/get-user.decorator';
+
+import { CreatePostDto } from './dto/create-post.dto';
+import { Post as PostEntity } from './post.entity';
+import { PostService } from './post.service';
 import { User } from 'src/auth/user.entity';
+import { GetUser } from 'src/@common/decorators/get-user.decorator';
 
 @Controller()
 @UseGuards(AuthGuard())
@@ -24,13 +26,26 @@ export class PostController {
   constructor(private postService: PostService) {}
 
   @Get('/markers/my')
-  getAllMarkers(@GetUser() user: User) {
-    return this.postService.getAllMarkers(user);
+  getAllMyMarkers(
+    @GetUser() user: User,
+  ): Promise<
+    Pick<PostEntity, 'id' | 'latitude' | 'longitude' | 'color' | 'score'>[]
+  > {
+    return this.postService.getMyMarkers(user);
   }
 
   @Get('/posts/my')
-  getPosts(@Query('page') page: number, @GetUser() user: User) {
+  getMyPosts(@Query('page') page: number, @GetUser() user: User) {
     return this.postService.getMyPosts(page, user);
+  }
+
+  @Get('/posts/my/search')
+  searchMyPostsByTitleAndAddress(
+    @Query('query') query: string,
+    @Query('page') page: number,
+    @GetUser() user: User,
+  ) {
+    return this.postService.searchMyPostsByTitleAndAddress(query, page, user);
   }
 
   @Get('/posts/:id')
@@ -45,7 +60,10 @@ export class PostController {
   }
 
   @Delete('/posts/:id')
-  deletePost(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+  deletePost(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<number> {
     return this.postService.deletePost(id, user);
   }
 
@@ -69,12 +87,13 @@ export class PostController {
     return this.postService.getPostsByMonth(year, month, user);
   }
 
-  @Get('/posts/my/search')
-  searchMyPostsByTitleAndAddress(
-    @Query('query') query: string,
-    @Query('page') page: number,
-    @GetUser() user: User,
-  ) {
-    return this.postService.searchMyPostsByTitleAndAddress(query, page, user);
+  @Get('/posts/scores/count')
+  async getCountByScore(@GetUser() user: User) {
+    return this.postService.getPostCountByField(user, 'score');
+  }
+
+  @Get('/posts/colors/count')
+  async getCountByColor(@GetUser() user: User) {
+    return this.postService.getPostCountByField(user, 'color');
   }
 }
