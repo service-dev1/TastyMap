@@ -10,7 +10,7 @@ import {
 
 import {colors} from '@/constants';
 import type {MarkerColor} from '@/types';
-import CustomMarker from './common/CustomMarker';
+import CustomMarker from '@/components/common/CustomMarker';
 
 interface MarkerSelectorProps extends PressableProps {
   markerColor: MarkerColor;
