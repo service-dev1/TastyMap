@@ -72,3 +72,6 @@ front/.yarn/*
 !front/.yarn/releases
 !front/.yarn/sdks
 !front/.yarn/versions
+
+
+server/dist
